@@ -23,7 +23,7 @@ private:
         : data{std::move(d)}, prev{p}, next{n} {}
   };
 
-  string toStr(int value) const {
+  string toStr(const T& value) const {
         ostringstream oss;
         oss << value;
         return oss.str();
