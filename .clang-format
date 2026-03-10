@@ -1,0 +1,7 @@
+BasedOnStyle: LLVM
+IndentWidth: 4
+BraceWrapping:
+  AfterFunction: false   # opening brace stays on same line as function signature
+  AfterClass: false
+  AfterStruct: false
+  AfterControlStatement: false

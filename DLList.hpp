@@ -2,16 +2,16 @@
 #define DLLIST_HPP
 
 #include <algorithm>
+#include <sstream>
+#include <string>
+
 using namespace std;
 
-template <typename T>
-class DLList
-{
+template <typename T> class DLList {
 private:
   // The basic doubly linked DLList node. Nested inside of DLList, can be public
   // because the Node is itself private
-  struct Node
-  {
+  struct Node {
     T data;
     Node *prev;
     Node *next;
@@ -24,51 +24,47 @@ private:
   };
 
   string toStr(int value) const {
-        ostringstream oss;
-        oss << value;
-        return oss.str();
+    ostringstream oss;
+    oss << value;
+    return oss.str();
   }
 
 public:
-  class const_iterator
-  {
+  class const_iterator {
   public:
     // Public constructor for const_iterator.
     const_iterator() : current{nullptr} {}
 
-
     // Return the T stored at the current position.
     // For const_iterator, this is an accessor with a
     // const reference return type.
-    const T &operator*() const  { return retrieve(); }
+    const T &operator*() const { return retrieve(); }
 
-    const_iterator &operator++()
-    {
+    const_iterator &operator++() {
       current = current->next;
       return *this;
     }
 
-    const_iterator operator++(int)
-    {
+    const_iterator operator++(int) {
       const_iterator old = *this;
       ++(*this);
       return old;
     }
 
-    const_iterator &operator--()
-    {
+    const_iterator &operator--() {
       current = current->prev;
       return *this;
     }
 
-    const_iterator operator--(int)
-    {
+    const_iterator operator--(int) {
       const_iterator old = *this;
       --(*this);
       return old;
     }
 
-    bool operator==(const const_iterator &rhs) const { return current == rhs.current; }
+    bool operator==(const const_iterator &rhs) const {
+      return current == rhs.current;
+    }
 
     bool operator!=(const const_iterator &rhs) const { return !(*this == rhs); }
 
@@ -87,11 +83,10 @@ public:
     friend class DLList<T>;
   };
 
-  class iterator : public const_iterator
-  {
+  class iterator : public const_iterator {
   public:
     // Public constructor for iterator. Calls the base-class constructor.
-    // Must be provided because the private constructor is written; 
+    // Must be provided because the private constructor is written;
     // otherwise zero-parameter constructor
     // would be disabled.
     iterator() {}
@@ -104,27 +99,23 @@ public:
     // a reference return type. The accessor is shown first.
     const T &operator*() const { return const_iterator::operator*(); }
 
-    iterator &operator++()
-    {
+    iterator &operator++() {
       this->current = this->current->next;
       return *this;
     }
 
-    iterator operator++(int)
-    {
+    iterator operator++(int) {
       iterator old = *this;
       ++(*this);
       return old;
     }
 
-    iterator &operator--()
-    {
+    iterator &operator--() {
       this->current = this->current->prev;
       return *this;
     }
 
-    iterator operator--(int)
-    {
+    iterator operator--(int) {
       iterator old = *this;
       --(*this);
       return old;
@@ -141,37 +132,31 @@ public:
 public:
   DLList() { init(); }
 
-  ~DLList()
-  {
+  ~DLList() {
     clear();
     delete head;
     delete tail;
   }
 
-  DLList(const DLList &rhs)
-  {
+  DLList(const DLList &rhs) {
     init();
     for (auto &x : rhs)
       push_back(x);
   }
 
-  DLList &operator=(const DLList &rhs)
-  {
+  DLList &operator=(const DLList &rhs) {
     DLList copy = rhs;
     std::swap(*this, copy);
     return *this;
   }
 
-  DLList(DLList &&rhs)
-      : theSize{rhs.theSize}, head{rhs.head}, tail{rhs.tail}
-  {
+  DLList(DLList &&rhs) : theSize{rhs.theSize}, head{rhs.head}, tail{rhs.tail} {
     rhs.theSize = 0;
     rhs.head = nullptr;
     rhs.tail = nullptr;
   }
 
-  DLList &operator=(DLList &&rhs)
-  {
+  DLList &operator=(DLList &&rhs) {
     theSize = rhs.theSize;
     head = rhs.head;
     tail = rhs.tail;
@@ -184,29 +169,28 @@ public:
 
     return *this;
   }
-  
-  DLList(initializer_list<T> init) : DLList() {  
-      for (const T& val : init) {
-          push_back(val);  
-      }
+
+  DLList(initializer_list<T> init) : DLList() {
+    for (const T &val : init) {
+      push_back(val);
+    }
   }
 
   string toString() const {
-      string st = "";
-      if (theSize == 0) return st;
-      auto it = begin();
-      st = toStr(*it++);
-      for (; it != end(); it++) {
-        st = st + " " +  toStr(*it);
-      }
+    string st = "";
+    if (theSize == 0)
       return st;
-
+    auto it = begin();
+    st = toStr(*it++);
+    for (; it != end(); it++) {
+      st = st + " " + toStr(*it);
+    }
+    return st;
   }
 
   // Return iterator representing beginning of DLList.
   // Mutator version is first, then accessor version.
   iterator begin() { return iterator(head->next); }
-
 
   const_iterator begin() const { return const_iterator(head->next); }
 
@@ -222,8 +206,7 @@ public:
   // Return true if the DLList is empty, false otherwise.
   bool empty() const { return size() == 0; }
 
-  void clear()
-  {
+  void clear() {
     while (!empty())
       pop_front();
   }
@@ -251,24 +234,22 @@ public:
   void pop_back() { erase(--end()); }
 
   // Insert x before itr.
-  iterator insert(iterator itr, const T &x)
-  {
+  iterator insert(iterator itr, const T &x) {
     Node *p = itr.current;
     ++theSize;
     return iterator(p->prev = p->prev->next = new Node{x, p->prev, p});
   }
 
   // Insert x before itr.
-  iterator insert(iterator itr, T &&x)
-  {
+  iterator insert(iterator itr, T &&x) {
     Node *p = itr.current;
     ++theSize;
-    return iterator(p->prev = p->prev->next = new Node{std::move(x), p->prev, p});
+    return iterator(p->prev = p->prev->next =
+                        new Node{std::move(x), p->prev, p});
   }
 
   // Erase item at itr.
-  iterator erase(iterator itr)
-  {
+  iterator erase(iterator itr) {
     Node *p = itr.current;
     iterator retVal(p->next);
     p->prev->next = p->next;
@@ -279,65 +260,11 @@ public:
     return retVal;
   }
 
-  iterator erase(iterator from, iterator to)
-  {
+  iterator erase(iterator from, iterator to) {
     for (iterator itr = from; itr != to;)
       itr = erase(itr);
 
     return to;
-  }
-
-  void removeOdd()
-  {
-    Node *curr = head->next;
-    while (curr != tail)
-    {
-      Node *before = curr->prev;
-      Node *after = curr->next;
-      if (curr->data % 2)
-      {
-        before->next = after;
-        after->prev = before;
-        delete curr;
-        theSize--;
-      }
-      curr = after;
-    }
-  }
-
-  void reverse()
-  {
-    Node *fwd = head->next;
-    Node *rev = tail->prev;
-    bool swappedMid = false;
-    while (fwd != tail && fwd != rev && !swappedMid)
-    {
-
-      Node *fwdNext = fwd->next;
-      Node *revPrev = rev->prev;
-
-      fwd->prev->next = rev;
-      rev->next->prev = fwd;
-
-      if (fwd->next != rev)
-      {
-        fwd->next->prev = rev;
-        rev->prev->next = fwd;
-        std::swap(fwd->next, rev->next);
-        std::swap(fwd->prev, rev->prev);
-      }
-      else
-      {
-        fwd->next = rev->next;
-        rev->next = fwd;
-        rev->prev = fwd->prev;
-        fwd->prev = rev;
-        swappedMid = true;
-      }
-
-      fwd = fwdNext;
-      rev = revPrev;
-    }
   }
 
 private:
@@ -345,8 +272,7 @@ private:
   Node *head;
   Node *tail;
 
-  void init()
-  {
+  void init() {
     theSize = 0;
     head = new Node;
     tail = new Node;
@@ -356,4 +282,3 @@ private:
 };
 
 #endif
-
